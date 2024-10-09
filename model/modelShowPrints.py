@@ -11,4 +11,10 @@ class ModeloHuellas:
         cursor.execute(query, (user_id,))
         huellas = cursor.fetchall()
         cursor.close()
+
+        # Depurar los resultados
+        print(f"Resultado de la consulta: {huellas}")
         return huellas
+
+
+

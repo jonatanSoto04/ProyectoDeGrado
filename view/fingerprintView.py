@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
+from controller.listController import Controlador
 from controller.fingerprintController import ControladorHuellas
 from PIL import Image, ImageTk  # Para manejar las imágenes
-
 
 class VistaHuellas:
     def __init__(self, root, user_id, user_name):
@@ -91,33 +91,42 @@ class VistaHuellas:
                     tarjeta["imagen_path"] = imagen_destino
 
     def guardar_datos(self):
+        datos_guardados = True  # Variable para verificar si todos los datos se guardaron correctamente
+
         for tarjeta in self.tarjetas:
             tipo_huella = tarjeta["tipo_huella"].get()
             resultado_analisis = tarjeta["resultado"].get()
             imagen_path = tarjeta["imagen_path"]
 
             if tipo_huella and resultado_analisis and imagen_path:
-                # Intentar convertir el valor de resultado_analisis a entero
                 try:
                     resultado_analisis = int(resultado_analisis)
                 except ValueError:
                     messagebox.showerror("Error", f"El valor de análisis para {tipo_huella} debe ser un número entero.")
+                    datos_guardados = False
                     continue
 
                 # Guardar los datos usando el controlador
-                self.controlador.guardar_datos_huella(self.user_id, tipo_huella, resultado_analisis, imagen_path)
+                if not self.controlador.guardar_datos_huella(self.user_id, tipo_huella, resultado_analisis,
+                                                             imagen_path):
+                    datos_guardados = False
+                    messagebox.showerror("Error", f"Error al guardar la huella para el dedo {tipo_huella}.")
+                    break  # Detener el proceso si hay error al guardar
             else:
                 messagebox.showwarning("Advertencia", f"Faltan datos para el dedo {tipo_huella}.")
+                datos_guardados = False
+
+        # Si todos los datos se guardaron correctamente, volvemos a la lista de usuarios
+        if datos_guardados:
+            messagebox.showinfo("Éxito", "Datos guardados correctamente.")
+            self.volver_a_lista()  # Redirigir a la pantalla principal
+        else:
+            messagebox.showwarning("Advertencia", "No se guardaron todos los datos correctamente.")
 
     def volver_a_lista(self):
-        self.root.destroy()  # Cerrar la ventana actual
+        self.root.quit()  # Cerrar la ventana actual sin destruirla
+        self.root.destroy()  # Asegurarse de destruir la ventana de huellas
         from view.main import VistaUsuarios  # Importar la vista de la lista
         nuevo_root = tk.Tk()
-        controlador = ControladorHuellas()
-        VistaUsuarios(controlador).mainloop()
-
-# Para probar la vista
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = VistaHuellas(root, user_id=2, user_name="luis Doe")  # Ejemplo con ID y nombre
-    root.mainloop()
+        controlador = Controlador()  # Controlador de la vista principal
+        VistaUsuarios(controlador, nuevo_root).mainloop()

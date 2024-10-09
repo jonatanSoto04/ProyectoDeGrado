@@ -2,11 +2,12 @@ import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from controller.listController import Controlador
 from viewUser import VistaUsuario  # Importar la vista de agregar usuario
+from viewShowPrints import VistaHuellasUsuario  # Asegúrate de importar la vista de huellas
 
 class VistaUsuarios:
-    def __init__(self, controlador):
+    def __init__(self, controlador, root=None):
         self.controlador = controlador
-        self.root = tk.Tk()
+        self.root = root or tk.Tk()
         self.root.title("Usuarios")
         self.root.geometry("1200x800")
 
@@ -41,19 +42,24 @@ class VistaUsuarios:
             self.tabla.insert("", tk.END, values=usuario)
 
     def mostrar_detalles(self, event):
-        item_id = self.tabla.focus()
-        item = self.tabla.item(item_id)
-        user_id = item["values"][0]
-        detalle_ventana = tk.Toplevel(self.root)
-        detalle_ventana.title(f"Detalles de Usuario {user_id}")
-        detalle_label = tk.Label(detalle_ventana, text=f"Detalles del usuario con ID: {user_id}")
-        detalle_label.pack()
+        item_id = self.tabla.focus()  # Obtiene la fila seleccionada
+        item = self.tabla.item(item_id)  # Obtiene los valores de esa fila
+        user_id = item["values"][2]  # Suponiendo que el número ID del usuario está en la columna 3
+
+        # Abrir la ventana de huellas con el user_id del usuario seleccionado
+        self.abrir_vista_huellas_usuario(user_id)
+
+    def abrir_vista_huellas_usuario(self, user_id):
+        # Crear la nueva ventana de huellas para el usuario seleccionado
+        nueva_ventana = tk.Toplevel(self.root)
+        VistaHuellasUsuario(nueva_ventana, user_id)  # Pasar el user_id al constructor de la vista de huellas
+        nueva_ventana.mainloop()
 
     def agregar_cliente(self):
-        self.root.destroy()  # Cierra la ventana principal
-        nuevo_root = tk.Tk()  # Crea una nueva ventana
-        VistaUsuario(nuevo_root)  # Inicia la vista de agregar usuario
-        nuevo_root.mainloop()  # Ejecuta el loop de la nueva ventana
+        # En lugar de destruir la ventana, la ocultamos
+        self.root.withdraw()  # Oculta la ventana actual
+        nuevo_root = tk.Toplevel(self.root)  # Crea una nueva ventana
+        VistaUsuario(nuevo_root, self.root)  # Inicia la vista de agregar usuario
 
     def importar_sql(self):
         archivo = filedialog.askopenfilename(filetypes=[("SQL Files", "*.sql")])
@@ -79,4 +85,5 @@ class VistaUsuarios:
 
 if __name__ == "__main__":
     controlador = Controlador()
-    controlador.iniciar()
+    app = VistaUsuarios(controlador)
+    app.mainloop()

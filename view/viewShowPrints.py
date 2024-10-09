@@ -9,9 +9,13 @@ from reportlab.lib.utils import ImageReader
 class VistaHuellasUsuario:
     def __init__(self, root, user_id):
         self.root = root
+        self.root = root
         self.user_id = user_id
         self.controlador = ControladorHuellas()
+
+        # Obtener las huellas desde el controlador
         self.huellas = self.controlador.obtener_huellas_usuario(self.user_id)
+        print(f"Huellas en la vista: {self.huellas}")  # Imprimir para verificar los datos
 
         self.root.title("Huellas de Usuario")
         self.root.geometry("1200x800")
@@ -40,6 +44,11 @@ class VistaHuellasUsuario:
         self.crear_tarjetas()
 
     def crear_tarjetas(self):
+        if not self.huellas:
+            print("No se encontraron huellas para este usuario.")
+        else:
+            print(f"Se encontraron {len(self.huellas)} huellas para el usuario.")
+
         for index, huella in enumerate(self.huellas):
             if index >= 10:  # Limitar a 10 tarjetas
                 break
@@ -58,11 +67,14 @@ class VistaHuellasUsuario:
 
             # Cargar y mostrar la imagen
             imagen_path = huella['imagen_path']
-            img = Image.open(imagen_path)
-            img = img.resize((200, 200))  # Cambiar el tamaño a 200x200
-            img_tk = ImageTk.PhotoImage(img)
-            tk.Label(frame_tarjeta, image=img_tk).pack()
-            frame_tarjeta.image = img_tk  # Mantener referencia a la imagen
+            try:
+                img = Image.open(imagen_path)
+                img = img.resize((200, 200))  # Cambiar el tamaño a 200x200
+                img_tk = ImageTk.PhotoImage(img)
+                tk.Label(frame_tarjeta, image=img_tk).pack()
+                frame_tarjeta.image = img_tk  # Mantener referencia a la imagen
+            except Exception as e:
+                print(f"Error al cargar la imagen: {imagen_path}. Error: {e}")
 
     def descargar_pdf(self):
         # Abrir un diálogo para seleccionar la ubicación de descarga
@@ -107,5 +119,5 @@ class VistaHuellasUsuario:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = VistaHuellasUsuario(root, user_id=2)  # Cambia el user_id según sea necesario
+    app = VistaHuellasUsuario(root)  # Cambia el user_id según sea necesario
     root.mainloop()

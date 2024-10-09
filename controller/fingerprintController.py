@@ -20,12 +20,11 @@ class ControladorHuellas:
         # Guardar los datos de la huella en la base de datos junto con la ruta de la imagen
         if tipo_huella and resultado_analisis and imagen_path:
             if self.modelo_huellas.guardar_huella_en_bd(user_id, tipo_huella, resultado_analisis, imagen_path):
-                print("Datos de huellas guardados exitosamente")
+                return True
             else:
-                messagebox.showerror("Error", "Error al guardar los datos de la huella en la base de datos.")
+                return False
         else:
             messagebox.showwarning("Advertencia", "Por favor, complete todos los campos antes de guardar.")
-        messagebox.showinfo("Éxito", "Datos de la huella guardados correctamente.")
-
+            return False
     def obtener_huellas_usuario(self, user_id):
         return self.modelo_huellas.obtener_huellas_usuario(user_id)
