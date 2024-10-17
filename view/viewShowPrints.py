@@ -9,15 +9,14 @@ from reportlab.lib.utils import ImageReader
 class VistaHuellasUsuario:
     def __init__(self, root, user_id):
         self.root = root
-        self.root = root
         self.user_id = user_id
         self.controlador = ControladorHuellas()
 
-        # Obtener las huellas desde el controlador
+        # Obtener las huellas desde el controlador usando el user_id
         self.huellas = self.controlador.obtener_huellas_usuario(self.user_id)
         print(f"Huellas en la vista: {self.huellas}")  # Imprimir para verificar los datos
 
-        self.root.title("Huellas de Usuario")
+        self.root.title(f"Huellas de Usuario {self.user_id}")
         self.root.geometry("1200x800")
 
         # Crear la interfaz de usuario
@@ -40,14 +39,14 @@ class VistaHuellasUsuario:
         self.root.grid_rowconfigure(1, weight=1)
         self.root.grid_columnconfigure(0, weight=1)
 
-        # Crear tarjetas
+        # Crear tarjetas con los datos de las huellas
         self.crear_tarjetas()
 
     def crear_tarjetas(self):
         if not self.huellas:
             print("No se encontraron huellas para este usuario.")
         else:
-            print(f"Se encontraron {len(self.huellas)} huellas para el usuario.")
+            print(f"Se encontraron {len(self.huellas)} huellas para el usuario {self.user_id}.")
 
         for index, huella in enumerate(self.huellas):
             if index >= 10:  # Limitar a 10 tarjetas
@@ -75,7 +74,6 @@ class VistaHuellasUsuario:
                 frame_tarjeta.image = img_tk  # Mantener referencia a la imagen
             except Exception as e:
                 print(f"Error al cargar la imagen: {imagen_path}. Error: {e}")
-
     def descargar_pdf(self):
         # Abrir un diálogo para seleccionar la ubicación de descarga
         pdf_path = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF files", "*.pdf")])
@@ -111,13 +109,12 @@ class VistaHuellasUsuario:
         messagebox.showinfo("Éxito", "PDF descargado correctamente.")
 
     def volver_a_lista(self):
-        self.root.destroy()  # Cerrar la ventana actual
-        from view.main import VistaUsuarios  # Importar la vista de la lista
-        nuevo_root = tk.Tk()
-        controlador = ControladorHuellas()
-        VistaUsuarios(controlador).mainloop()
+        # Destruye la ventana actual y vuelve a mostrar la ventana anterior
+        self.root.destroy()
+        if self.parent_window:  # Si hay una ventana principal oculta
+            self.parent_window.deiconify()  # La volvemos a mostrar
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = VistaHuellasUsuario(root)  # Cambia el user_id según sea necesario
-    root.mainloop()
+#if __name__ == "__main__":
+#    root = tk.Tk()
+#    app = VistaHuellasUsuario(root, user_id)
+#    root.mainloop()

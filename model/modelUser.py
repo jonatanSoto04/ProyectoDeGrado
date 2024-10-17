@@ -26,7 +26,8 @@ class ModeloUsuario:
 
     def obtener_usuarios(self):
         cursor = self.conexion.cursor()
-        cursor.execute("SELECT name, correo, numero_id, numero_celular FROM user")
+        # Ahora incluye el iduser en la consulta para que lo puedas usar
+        cursor.execute("SELECT iduser, name, correo, numero_id, numero_celular FROM user")
         usuarios = cursor.fetchall()
         cursor.close()
         return usuarios
