@@ -6,9 +6,13 @@ class ControladorHuellas:
         self.modelo_huellas = ModeloHuellas()
 
     def seleccionar_imagen(self):
-        # Abrir diálogo para seleccionar la imagen
-        return filedialog.askopenfilename(title="Seleccionar imagen", filetypes=[("PNG files", "*.png")])
-
+        # Usamos filedialog.askopenfilename para seleccionar archivos de imagen
+        imagen_path = filedialog.askopenfilename(
+            title="Selecciona una imagen de huella",
+            filetypes=[("Archivos de imagen", "*.png;*.jpg;*.jpeg")],  # Filtros de archivos
+            initialdir=r"C:\Users\%USERNAME%\Desktop"  # Inicializar el diálogo en el escritorio
+        )
+        return imagen_path
     def guardar_imagen(self, user_id, user_name, imagen_path, dedo):
         # Guardar la imagen en la carpeta del usuario
         if imagen_path:

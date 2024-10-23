@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
+
+from Pruebaimagenes.test import predecir_tipo_huella, model, tipo_huella
 from controller.listController import Controlador
 from controller.fingerprintController import ControladorHuellas
 from PIL import Image, ImageTk  # Para manejar las imágenes
@@ -74,7 +76,7 @@ class VistaHuellas:
         label_tipo_huella.pack(pady=(10, 5))  # Espaciado vertical
 
         # Nuevo Label para mostrar el tipo de huella
-        label_tipo_huella_value = tk.Label(frame, text="Arco", bg='#ffffff', font=('Arial', 10, 'italic'))
+        label_tipo_huella_value = tk.Label(frame, text={tipo_huella}, bg='#ffffff', font=('Arial', 10, 'italic'))
         label_tipo_huella_value.pack(pady=5)
 
         # Label para numeración
@@ -116,18 +118,31 @@ class VistaHuellas:
             frame.config(bg='#ffffff', bd=2)  # Restaura el color original y el borde
 
     def cargar_imagen(self, dedo, label_imagen):
+        # Seleccionar la imagen
         imagen_path = self.controlador.seleccionar_imagen()
         if imagen_path:
+            # Guardar la imagen en una ubicación específica
             imagen_destino = self.controlador.guardar_imagen(self.user_id, self.user_name, imagen_path, dedo)
+            # Cargar y mostrar la imagen seleccionada en la interfaz
             img = Image.open(imagen_destino).resize((150, 150))
             img_tk = ImageTk.PhotoImage(img)
             label_imagen.config(image=img_tk)
             label_imagen.image = img_tk  # Guardar referencia para evitar que se borre
 
-            # Actualizar la ruta de la imagen en la tarjeta
+            # Realizar la predicción del tipo de huella con el modelo entrenado
+            tipo_huella = predecir_tipo_huella(imagen_destino, model)
+
+            # Actualizar el label del tipo de huella en la tarjeta correspondiente
             for tarjeta in self.tarjetas:
                 if tarjeta["label_imagen"] == label_imagen:
                     tarjeta["imagen_path"] = imagen_destino
+                    tarjeta["label_tipo_huella_value"].config(text=tipo_huella)  # Mostrar tipo de huella predicho
+
+                    # Mostrar los labels que estaban ocultos
+                    tarjeta["label_tipo_huella"].pack()  # Mostrar el label del tipo de huella
+                    tarjeta["label_tipo_huella_value"].pack()  # Mostrar el valor del tipo predicho
+                    tarjeta["label_entero"].pack()  # Mostrar el label de numeración
+                    tarjeta["label_entero_value"].pack()  # Mostrar la numeración
 
     def guardar_datos(self):
         datos_guardados = True  # Variable para verificar si todos los datos se guardaron correctamente
@@ -164,6 +179,7 @@ class VistaHuellas:
         self.root.quit()  # Cerrar la ventana actual sin destruirla
         self.root.destroy()  # Asegurarse de destruir la ventana de huellas
         from view.main import VistaUsuarios  # Importar la vista de la lista
-        nuevo_root = tk.Tk()
-        controlador = Controlador()  # Controlador de la vista principal
-        VistaUsuarios(controlador, nuevo_root).mainloop()
+        nuevo_root = tk.Tk()  # Crear nueva instancia de Tk
+        controlador = Controlador()  # Crear nueva instancia del controlador
+        vista = VistaUsuarios(controlador, nuevo_root)  # Crear la vista de usuarios
+        nuevo_root.mainloop()  # Iniciar el bucle principal de la nueva ventana
